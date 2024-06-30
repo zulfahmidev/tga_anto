@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TES INPUS ANTO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
+    <style>
+        .open-sans {
+            font-family: "Open Sans", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 500;
+            font-style: normal;
+            font-variation-settings: "wdth" 100;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 open-sans transition">
+
+    <div class="mx-auto w-fit my-6 flex items-center gap-3">
+        <a href="/"
+            class="rounded-full py-2 w-32 text-center border border-blue-800 hover:border-blue-700 active:border-blue-800 text-blue-500 hover:bg-blue-800/10 cursor-pointer">Dashboard</a>
+        <button
+            onclick="switchTheme()"
+            class="w-12 h-12 bg-slate-300 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:bg-slate-300 dark:active:bg-slate-800 rounded-full text-blue-800 dark:text-yellow-500 text-xl flex items-center justify-center cursor-pointer">
+            <i class="fa hidden dark:inline fa-sun"></i>
+            <i class="fa dark:hidden fa-moon"></i>
+        </button>
+        <a href="/history.html"
+            class="rounded-full py-2 w-32 text-center bg-blue-800 hover:bg-blue-700 active:bg-blue-800 text-white cursor-pointer">History</a>
+    </div>
+
+    <div class="mx-auto px-5 pb-5" style="max-width: 788px;">
+        <div class="bg-white shadow-lg dark:bg-slate-800 border-b-4 border-blue-800 p-5 w-full" id="app">
+            <div class="text-blue-500 dark:text-blue-300 text-center">Sensor Data Record</div>
+
+            <table class="w-full mt-4 text-center dark:text-white">
+                <thead class="bg-blue-800 text-white">
+                    <tr>
+                        <td class="py-2">#</td>
+                        <td class="py-2">Waktu</td>
+                        <td class="py-2">Berat Inpus</td>
+                        <td class="py-2">Tetesan</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-if="history.length == 0" class="text-center text-black/80 dark:text-white/80 text-sm bg-slate-200 dark:bg-slate-700">
+                        <td colspan="4" class="py-2">Data kosong</td>
+                    </tr>
+                    <tr class="odd:bg-slate-300 even:bg-slate-200 dark:odd:bg-slate-700 dark:even:bg-slate-600"
+                        v-for="(v,i) in history" :key="i">
+                        <td class="py-2">{{ i+1 }}</td>
+                        <td class="py-2">-</td>
+                        <td class="py-2">{{ v.weight }} ml</td>
+                        <td class="py-2">{{ v.droplets }} D/S</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRYwbBFKDGbn3BOj_cp84gnllkPEbMgvk",
+            authDomain: "my-test-ecd9a.firebaseapp.com",
+            databaseURL: "https://my-test-ecd9a-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "my-test-ecd9a",
+            storageBucket: "my-test-ecd9a.appspot.com",
+            messagingSenderId: "199351268984",
+            appId: "1:199351268984:web:c5e4904a138d94669b9f8d"
+        };
+        const fb = initializeApp(firebaseConfig)
+        const db = getDatabase(fb);
+
+        const app = new Vue({
+            el: '#app',
+            data: {
+                history: [] // Data to be fetched and displayed
+            },
+            mounted() {
+                const historyRef = ref(db, 'history');
+                onValue(historyRef, (snapshot) => {
+                    this.history.length = 0; // Clear the array
+                    snapshot.forEach((childSnapshot) => {
+                        this.history.push(childSnapshot.val());
+                    });
+                });
+            }
+        });
+    </script>
+
+    <script>
+        const currentTheme = localStorage.getItem('theme');
+        
+        tailwind.config = {
+            darkMode: 'class'
+        }
+        
+        function isDarkMode() {
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+
+        if (currentTheme) {
+            document.documentElement.classList.add(currentTheme);
+        }else {
+            let mode = isDarkMode() ? 'dark' : 'light';
+            localStorage.setItem('theme', mode);
+            switchTheme()
+        }
+
+        function switchTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+    </script>
+
+</body>
+
+</html>
