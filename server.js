@@ -16,34 +16,44 @@ const mqtt = MQTT.connect("http://4.145.80.180")
 mqtt.on('connect', () => {
     console.log('MQTT Connected')
 
-    mqtt.subscribe('anto', async (err) => {
+    mqtt.subscribe('si_adam_uno', (err) => {
         if (!err) {
-            console.log('Subscribed to anto')
-            setInterval(async () => {
-                const data = {
-                    weight: (Math.random() * 500).toFixed(2), 
-                    droplets: (Math.random() * 2).toFixed(2)
-                }
-                mqtt.publish('anto', JSON.stringify(data))
-
-                // Tambah data ke database
-                // await db.ref('history').push(data)
-            }, 1000)
+            console.log('Topic si_adam_uno connected')
         }
     })
 
-})
+    mqtt.on('message', ((topic, str) => {
+        if (topic == 'si_adam_uno') {
+            let data = JSON.parse(
+                str.toString()
+                .replace(`'`, `"`)
+                .replace(`'`, `"`)
+                .replace(`'`, `"`)
+                .replace(`'`, `"`)
+                .toLowerCase()
+            );
 
+            data.time = Date.now()
 
-// Socket.IO Connection
-io.on('connection', (socket) => {
-    console.log('a user connected');
-    mqtt.on('message', ((topic, message) => {
-        if (topic == 'anto') {
-            socket.emit('anto', message)
+            io.emit('si_adam_server', data)
+
+            // db.ref('history').push(data)
         }
     }))
+})
+// Socket.IO Connection
+io.on('connection', (socket) => {
+
+    socket.on('servo_forward', () => {
+        mqtt.publish('si_adam_backend', 'servo_forward')
+    })
+    
+    socket.on('servo_backward', () => {
+        mqtt.publish('si_adam_backend', 'servo_backward')
+    })
+
 });
+
 
 app.use(express.static(path.join(__dirname, '/public')))
 

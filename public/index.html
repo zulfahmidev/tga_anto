@@ -50,9 +50,11 @@
             <div class="text-blue-500 dark:text-blue-300">Gerakin Servo</div>
             <div class="flex gap-5 mx-auto">
                 <button
+                    onclick="servoBackward()"
                     class="py-2 px-3 rounded-full bg-blue-800 hover:bg-blue-700 active:bg-blue-800 mt-5 w-full cursor-pointer text-white"><i
                         class="fa fa-minus"></i></button>
                 <button
+                    onclick="servoForward()"
                     class="py-2 px-3 rounded-full bg-blue-800 hover:bg-blue-700 active:bg-blue-800 mt-5 w-full cursor-pointer text-white"><i
                         class="fa fa-plus"></i></button>
             </div>
@@ -155,11 +157,9 @@
             options: {}
         });
 
-        socket.on('anto', (message) => {
-            const str = new TextDecoder().decode(message)
-            const data = JSON.parse(str);
-            weightEl.innerHTML = `${data.weight} ml`
-            dropletsEl.innerHTML = `${data.droplets} D/S`
+        socket.on('si_adam_server', (data) => {
+            weightEl.innerHTML = `${data.weight.toFixed(2)} ml`
+            dropletsEl.innerHTML = `${data.droplets.toFixed(2)} D/S`
 
             let i = xValues.length + 1;
             if (xValues.length < 20) {
@@ -179,6 +179,13 @@
             dropletsChart.update()
         })
 
+        function servoForward() {
+            socket.emit('servo_forward')
+        }
+        
+        function servoBackward() {
+            socket.emit('servo_backward')
+        }
 
 
 
