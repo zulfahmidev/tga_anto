@@ -24,12 +24,12 @@ mqtt.on('connect', () => {
             console.log('Topic si_adam_uno connected')
         }
         
-        setInterval(() => {
-            mqtt.publish('si_adam_uno', JSON.stringify({
-                droplets: Math.random() * 4,
-                weight: Math.random() * 4
-            }))
-        }, 1000)
+        // setInterval(() => {
+        //     mqtt.publish('si_adam_uno', JSON.stringify({
+        //         droplets: Math.random() * 4,
+        //         weight: Math.random() * 4
+        //     }))
+        // }, 1000)
     })
 
     mqtt.on('message', ((topic, str) => {
