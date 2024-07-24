@@ -64,9 +64,9 @@
                     <tr class="odd:bg-slate-300 even:bg-slate-200 dark:odd:bg-slate-700 dark:even:bg-slate-600"
                         v-for="(v,i) in history" :key="i">
                         <td class="py-2">{{ i+1 }}</td>
-                        <td class="py-2">-</td>
-                        <td class="py-2">{{ v.weight }} ml</td>
-                        <td class="py-2">{{ v.droplets }} D/S</td>
+                        <td class="py-2">{{ dateFormat(v.time) }}</td>
+                        <td class="py-2">{{ v.weight.toFixed(2) }} ml</td>
+                        <td class="py-2">{{ v.droplets.toFixed(2) }} D/S</td>
                     </tr>
                 </tbody>
             </table>
@@ -102,7 +102,17 @@
                         this.history.push(childSnapshot.val());
                     });
                 });
-            }
+            },
+            methods: {
+                dateFormat(time) {
+                    let date = new Date(time)
+                    return `${this.addZero(date.getDate())}-${this.addZero(date.getMonth())}-${date.getFullYear()} ${this.addZero(date.getHours())}:${this.addZero(date.getMinutes())}`;
+                },
+                addZero(number) {
+                    if (number < 10) return `0${number}`
+                    return `${number}`
+                }
+            },
         });
     </script>
 

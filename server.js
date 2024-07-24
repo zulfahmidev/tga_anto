@@ -12,6 +12,9 @@ const PORT = 3000
 
 const mqtt = MQTT.connect("http://4.145.80.180")
 
+let lastDate = "";
+let dataPerMinutes = []
+
 // MQTT Connection
 mqtt.on('connect', () => {
     console.log('MQTT Connected')
@@ -20,6 +23,13 @@ mqtt.on('connect', () => {
         if (!err) {
             console.log('Topic si_adam_uno connected')
         }
+        
+        setInterval(() => {
+            mqtt.publish('si_adam_uno', JSON.stringify({
+                droplets: Math.random() * 4,
+                weight: Math.random() * 4
+            }))
+        }, 1000)
     })
 
     mqtt.on('message', ((topic, str) => {
@@ -33,11 +43,28 @@ mqtt.on('connect', () => {
                 .toLowerCase()
             );
 
+            
             data.time = Date.now()
 
             io.emit('si_adam_server', data)
-
-            // db.ref('history').push(data)
+            dataPerMinutes.push(data)
+            
+            let date = new Date(data.time)
+            if (date.getMinutes() != lastDate) {
+                let dl = 0;
+                let wg = 0;
+                dataPerMinutes.forEach(v => {
+                    dl += v.droplets
+                    wg += v.weight
+                })
+                db.ref('history').push({
+                    droplets: dl/dataPerMinutes.length,
+                    weight: wg/dataPerMinutes.length,
+                    time: data.time,
+                })
+                dataPerMinutes = []
+            }
+            lastDate = date.getMinutes()
         }
     }))
 })
